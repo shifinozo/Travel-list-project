@@ -39,7 +39,14 @@ const AddPlace = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ink px-6 py-12">
+    <div className="min-h-screen relative flex items-center justify-center bg-ink px-6 py-12">
+
+      <button
+        onClick={() => navigate('/')}
+        className="absolute left-6 top-6 md:left-10 md:top-10 border border-gold/40 text-ivory text-sm px-4 py-2 rounded-full hover:bg-gold hover:text-ink hover:border-gold transition-all duration-300"
+      >
+        ← Back
+      </button>
 
       <div className="bg-ivory p-8 md:p-10 rounded-2xl shadow-premium w-full max-w-md border border-gold/20">
 
@@ -88,11 +95,15 @@ const AddPlace = () => {
             onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
-                      setForm({
-                        ...form,
-                        image: file,
-                        imagePreview: URL.createObjectURL(file),//added for upload image
-                      });
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setForm((prev) => ({
+                          ...prev,
+                          image: file,
+                          imagePreview: reader.result, //base64 data URL so it survives persist/reload
+                        }));
+                      };
+                      reader.readAsDataURL(file);
                     }
                   }}
             className="w-full px-4 py-3 bg-white border border-ink/10 rounded-lg text-ink/70 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:bg-gold file:text-ink file:text-sm file:font-medium focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold transition"
