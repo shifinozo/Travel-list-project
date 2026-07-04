@@ -27,6 +27,11 @@ export default {
       boxShadow: {
         premium: "0 20px 45px -15px rgba(0,0,0,0.35)",
       },
+      keyframes: {
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
+      },
     },
   },
   plugins: [],

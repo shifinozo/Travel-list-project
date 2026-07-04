@@ -11,6 +11,11 @@ const placesSlice = createSlice({
       state.pending.push({
         id: Date.now(),
         status: 'Pending',
+        category: 'other',
+        rating: 0,
+        favorite: false,
+        lat: null,
+        lng: null,
         ...action.payload,
       })
     },
@@ -19,6 +24,7 @@ const placesSlice = createSlice({
       if (place) {
         state.pending = state.pending.filter((p) => p.id !== action.payload)
         place.status = 'Visited'
+        place.visitedAt = Date.now()
         state.visited.push(place)
       }
     },
@@ -26,10 +32,28 @@ const placesSlice = createSlice({
       state.pending = state.pending.filter((p) => p.id !== action.payload)
       state.visited = state.visited.filter((p) => p.id !== action.payload)
     },
+    toggleFavorite: (state, action) => {
+      const place =
+        state.pending.find((p) => p.id === action.payload) ||
+        state.visited.find((p) => p.id === action.payload)
+      if (place) {
+        place.favorite = !place.favorite
+      }
+    },
+    setRating: (state, action) => {
+      const { id, rating } = action.payload
+      const place =
+        state.pending.find((p) => p.id === id) ||
+        state.visited.find((p) => p.id === id)
+      if (place) {
+        place.rating = rating
+      }
+    },
   },
 })
 
-export const { addplace, moveToVisited, deleteplace } = placesSlice.actions
+export const { addplace, moveToVisited, deleteplace, toggleFavorite, setRating } =
+  placesSlice.actions
 export default placesSlice.reducer
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -72,4 +96,4 @@ export default placesSlice.reducer
 
 // export const { addplace, moveToVisited, deleteplace } = placesSlice.actions;
 // export default placesSlice.reducer;
-  
+

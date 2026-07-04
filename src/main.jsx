@@ -5,15 +5,13 @@ import App from './App.jsx'
 import { Provider } from 'react-redux'
 import { persistor, store } from './redux/store.js'
 import { PersistGate } from 'redux-persist/integration/react'
+import { SkeletonScreen } from './components/SkeletonCard.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode> 
+  <StrictMode>
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor} >
-
-
-    <App />
-
+      <PersistGate loading={<SkeletonScreen />} persistor={persistor}>
+        <App />
       </PersistGate>
     </Provider>
   </StrictMode>,

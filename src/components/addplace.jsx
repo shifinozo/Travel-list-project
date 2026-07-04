@@ -3,36 +3,46 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addplace } from "../redux/placeslice";
+import { CATEGORIES } from "../constants/categories";
+import StarRating from "./StarRating";
+import { geocodePlace } from "../utils/geocode";
 
 const AddPlace = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [form, setForm] = useState({ name: "", country: "", notes: "",image:null,imagePreview:"" });//imagepreview also used for upload image
+  const [form, setForm] = useState({ name: "", country: "", notes: "",image:null,imagePreview:"", category: "other", rating: 0 });//imagepreview also used for upload image
   const [msg, setMsg] = useState("");
+  const [locating, setLocating] = useState(false);
 
-  const handlefunction = (e) => {
+  const handlefunction = async (e) => {
     e.preventDefault();
 
     if (form.name.trim() === "") {
       setMsg("⚠️ Please enter a place name.");
-      return; 
+      return;
     }
     if (form.country.trim() === "") {
       setMsg("⚠️ Please enter a country name.");
-      return; 
+      return;
     }if (form.notes.trim() === "") {
       setMsg("⚠️ Please enter a sentence about it.");
-      return; 
+      return;
     }
-    if (!form.image) 
-      return 
+    if (!form.image)
+      return
     setMsg("⚠️ Please upload an image.");
 
+    setLocating(true);
+    const coords = await geocodePlace(form.name, form.country);
+    setLocating(false);
 
-   dispatch(addplace({ 
-      ...form, 
-      image: form.imagePreview //added for upload image
+   const { imagePreview, ...place } = form
+   dispatch(addplace({
+      ...place,
+      image: form.imagePreview, //added for upload image
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
     }))
     setMsg("")
     navigate("/")
@@ -82,6 +92,27 @@ const AddPlace = () => {
 
           ></textarea>
 
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="w-full px-4 py-3 bg-white border border-ink/10 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold transition cursor-pointer"
+          >
+            {CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.icon} {c.label}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-ink/60">Rating</span>
+            <StarRating
+              value={form.rating}
+              onChange={(rating) => setForm({ ...form, rating })}
+              size="text-xl"
+            />
+          </div>
+
           {/* <input
             placeholder="image URL"
             type="text"
@@ -123,9 +154,10 @@ const AddPlace = () => {
 
           <button
             type="submit"
-            className="w-full bg-ink text-gold py-3 rounded-full font-semibold tracking-wide shadow-lg hover:bg-gold hover:text-ink transition-colors duration-300"
+            disabled={locating}
+            className="w-full bg-ink text-gold py-3 rounded-full font-semibold tracking-wide shadow-lg hover:bg-gold hover:text-ink transition-colors duration-300 disabled:opacity-60 disabled:cursor-wait"
           >
-            Add to Wishlist
+            {locating ? "Locating on map..." : "Add to Wishlist"}
           </button>
 
           { <p className="text-red-600 text-sm text-center">{msg}</p>}
